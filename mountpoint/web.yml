@@ -1,0 +1,21 @@
+- name: web servers
+  hosts: web
+  become: true
+  tasks:
+    - name: install apache
+      yum:
+        name: httpd
+        state: present
+        update_cache: true
+    - name: start apache server
+      service:
+        name: httpd
+        state: started
+        enabled: yes
+    - name: Copy using inline content
+      copy:
+        src: files/index.html
+        dest: /var/www/html/index.html
+        owner: root
+        group: root
+        mode: 0644
