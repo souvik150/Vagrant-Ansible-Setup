@@ -4,18 +4,59 @@
   tasks:
     - name: install apache
       yum:
-        name: httpd
+        name: httpd,git
         state: present
         update_cache: true
-    - name: start apache server
+      tags:
+        - base
+    - name: install packages
+      yum:
+        name:
+          - php
+          - php-mysql
+        state: present
+        update_cache: true
+      tags:
+        - base
+    - name: start apache service
       service:
         name: httpd
         state: started
         enabled: yes
+      tags:
+        - base
     - name: Copy using inline content
       copy:
-        src: files/index.html
-        dest: /var/www/html/index.html
+        src: "{{ item }}"
+        dest: "{{ document_root_path }}"
         owner: root
         group: root
         mode: 0644
+        # backup: yes
+      loop:
+        # - files/index.html
+        - files/index.php
+    - name: vhost config block
+      block:
+        - name: Copy vhost config
+          copy:
+            src: files/ansible_site.conf
+            dest: "{{ vhost_config_file }}"
+            owner: root
+            group: root
+            mode: 0644
+    - name: Configure httpd.conf
+      lineinfile:
+        path: "{{ apache_config_file }}"
+        regexp: "^IncludeOptional"
+        line: "IncludeOptional conf.d/*.conf"
+      tags:
+        - vhost
+    - name: Remove index.html
+      file:
+        path: /var/www/html/index.php
+        state: absent
+    - name: Restart apache
+      service:
+        name: httpd
+        state: restarted

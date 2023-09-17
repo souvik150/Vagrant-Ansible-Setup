@@ -1,0 +1,15 @@
+- hosts: web
+  gather_facts: false
+  vars_prompt:
+    - name: "version"
+      prompt: "Which version do you want to install?"
+      private: no
+      defualt: "2.4.6"
+  tasks:
+    - name: debug task
+      debug:
+        msg: "Will install httpd-{{ version }}"
+    - name: install specific apache version
+      yum:
+        name: "httpd-{{ version }}"
+        state: present
