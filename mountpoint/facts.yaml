@@ -1,0 +1,8 @@
+- hosts: web
+  tasks:
+    - name: get facts
+      debug:
+        msg: "{{ ansible_all_ipv4_addresses.1 }} is the IP address of {{ ansible_hostname }}"
+    - name: get facts
+      debug:
+        msg: "{{ ansible_facts }}"
